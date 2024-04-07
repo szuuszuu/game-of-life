@@ -1,8 +1,8 @@
 [
 {
   "directory": "/home/szuszu/github/game-of-life/Game-Of-Life/build",
-  "command": "/usr/bin/g++  -I/home/szuszu/github/game-of-life/Game-Of-Life/include -g -o CMakeFiles/GameOfLife.dir/src/menutest.cpp.o -c /home/szuszu/github/game-of-life/Game-Of-Life/src/menutest.cpp",
-  "file": "/home/szuszu/github/game-of-life/Game-Of-Life/src/menutest.cpp"
+  "command": "/usr/bin/g++  -I/home/szuszu/github/game-of-life/Game-Of-Life/include -g -o CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o -c /home/szuszu/github/game-of-life/Game-Of-Life/src/imguitest.cpp",
+  "file": "/home/szuszu/github/game-of-life/Game-Of-Life/src/imguitest.cpp"
 },
 {
   "directory": "/home/szuszu/github/game-of-life/Game-Of-Life/build",

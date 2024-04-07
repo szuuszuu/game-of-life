@@ -171,4 +171,5 @@ CMakeFiles/GameOfLife.dir/src/GOL.cpp.o: \
  /usr/include/c++/11/bits/stl_vector.h \
  /usr/include/c++/11/bits/stl_bvector.h \
  /usr/include/c++/11/bits/vector.tcc \
- /usr/include/c++/11/pstl/execution_defs.h
+ /usr/include/c++/11/pstl/execution_defs.h /usr/include/c++/11/cstring \
+ /usr/include/string.h /usr/include/strings.h

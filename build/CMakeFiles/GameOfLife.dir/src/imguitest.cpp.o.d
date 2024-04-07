@@ -1,5 +1,5 @@
-CMakeFiles/GameOfLife.dir/src/menutest.cpp.o: \
- /home/szuszu/github/game-of-life/Game-Of-Life/src/menutest.cpp \
+CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o: \
+ /home/szuszu/github/game-of-life/Game-Of-Life/src/imguitest.cpp \
  /usr/include/stdc-predef.h \
  /home/szuszu/github/game-of-life/Game-Of-Life/include/GOL.h \
  /usr/include/c++/11/iostream \

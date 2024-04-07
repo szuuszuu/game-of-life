@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.0.0)
 project(GameOfLife VERSION 0.1.0 LANGUAGES C CXX)
 
 set(SOURCE_FILES
-    src/menutest.cpp
+    src/imguitest.cpp
+    # src/test.cpp
+    # src/menutest.cpp
     # src/main.cpp
     # src/imgui_demo.cpp
     src/GOL.cpp

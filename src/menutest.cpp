@@ -1,11 +1,76 @@
+#include "GOL.h"
+
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_sdlrenderer2.h>
 
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <vector>
 
-void alignForWidth(float width, float alignment = 0.5f) {
+
+class MainComponent {
+  public:
+    SDL_Window *window = nullptr;
+    SDL_Renderer *renderer = nullptr;
+    SDL_Texture *texture = nullptr;
+    Uint32 *buffer;
+
+    int windowSizeX;
+    int windowSizeY;
+
+    void init();
+    void menu();
+    void update();
+    void alignForWidth(float width, float alignment);
+    // void clearRenderer();
+    // void updateRenderer();
+    void drawCells(std::vector<std::vector<int>> arr);
+    void drawGridLines();
+    ~MainComponent();
+};
+
+void MainComponent::init() {
+  // Set up SDL2
+  SDL_Init(SDL_INIT_EVERYTHING);       
+  
+  int windowSizeX = (gridCountX * gridCellSize) + 1; 
+  int windowSizeY = (gridCountY * gridCellSize) + 1; 
+
+  buffer = new Uint32[windowSizeX * windowSizeY];
+  memset(buffer, 0, windowSizeX * windowSizeY * sizeof(Uint32));
+
+  SDL_CreateWindowAndRenderer(windowSizeX, windowSizeY, 0, &window, &renderer);
+  SDL_RenderSetScale(renderer, 1, 1);
+
+  texture = SDL_CreateTexture(renderer, 	
+    SDL_PIXELFORMAT_RGBA8888,
+		SDL_TEXTUREACCESS_STATIC,
+		windowSizeX,
+		windowSizeY);
+
+  SDL_SetRenderDrawColor(renderer, 22, 22, 22, 255);
+  SDL_RenderClear(renderer);
+
+  // Set up ImGui
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+  ImGui::StyleColorsDark();
+
+  ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+  ImGui_ImplSDLRenderer2_Init(renderer);
+
+	ImGui_ImplSDLRenderer2_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+
+  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+}
+
+void MainComponent::alignForWidth(float width, float alignment = 0.5f) {
   ImGuiStyle& style = ImGui::GetStyle();
   float avail = ImGui::GetContentRegionAvail().x;
   float off = (avail - width) * alignment;
@@ -13,103 +78,153 @@ void alignForWidth(float width, float alignment = 0.5f) {
 
 }
 
-int main(int argc, char *argv[]) {
-  SDL_Init(SDL_INIT_EVERYTHING);
-
-  SDL_Window *window = nullptr;
-  SDL_Renderer *renderer = nullptr;
-
-  SDL_CreateWindowAndRenderer(1280, 720, 0, &window, &renderer);
-  SDL_RenderSetScale(renderer, 1, 1);
-
-  SDL_SetRenderDrawColor(renderer, 22, 22, 22, 255);
+void MainComponent::update() {
   SDL_RenderClear(renderer);
+  ImGui::Render();
+  ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+  SDL_RenderPresent(renderer);
+}
 
+void MainComponent::menu() {
 
+    GameOfLife gol;
 
-  // Setup Dear ImGui context
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  //ImGui::StyleColorsLight();
-
-  // Setup Platform/Renderer backends
-  ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-  ImGui_ImplSDLRenderer2_Init(renderer);
-
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-  bool gameIsRunning = true;
-  while (gameIsRunning) {
-
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-      ImGui_ImplSDL2_ProcessEvent(&event);
-      if (event.type == SDL_QUIT) { gameIsRunning = false; }
-      if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window)) { gameIsRunning = false; }
-    }
-
-    // Start the Dear ImGui frame
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-
-    // Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-    {
-        static float f = 0.0f;
-        static int e = 0;
-
-        ImGui::Begin("Menu");                                   // Create a window called "Menu" and append into it.
-
-        ImGui::Text("Choose your population:");
-
-        ImGui::RadioButton("Random population", &e, 0);
-        ImGui::RadioButton("Choose population via clicking cells", &e, 1);
-        ImGui::RadioButton("Import population via .txt file", &e, 2);
+    ImGui::NewFrame(); 
 
 
-        ImGuiStyle& style = ImGui::GetStyle();
-        float width = 0.0f;
-        width += ImGui::CalcTextSize("START").x;
-        width += style.ItemSpacing.x;
-        width += 7.5f;
-        width += style.ItemSpacing.x;
-        width += ImGui::CalcTextSize("CLEAR").x;
-        alignForWidth(width);
+    static int e = 0;
 
-        if (ImGui::Button("START")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
-          // doSomething();
-        }  
-        ImGui::SameLine();
-        if (ImGui::Button("CLEAR")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
-          // doSomething();
-        }                           
-          
-        ImGui::End();
+    ImGui::Begin("Menu");                                   // Create a window called "Menu" and append into it.
+
+    ImGui::Text("Choose your population:");
+
+    ImGui::RadioButton("Random population", &e, 0);
+    ImGui::RadioButton("Choose population via clicking cells", &e, 1);
+    ImGui::RadioButton("Import population via .txt file", &e, 2);
+
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    float width = 0.0f;
+    width += ImGui::CalcTextSize("START").x;
+    width += style.ItemSpacing.x;
+    width += 7.5f;
+    width += style.ItemSpacing.x;
+    width += ImGui::CalcTextSize("CLEAR").x;
+    alignForWidth(width);
+
+    // switch (e)
+    // {
+    // case 0:
+    //   {
+    //     std::vector<std::vector<int>> arr = gol.init();
+    //     drawCells(arr);
+    //     update();
+    //     break;  
+    //   }
+      
+    
+    // default:
+    //   break;
+    // }
+
+
+    if (ImGui::Button("START")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
+      // doSomething();
+    }  
+    ImGui::SameLine();
+    if (ImGui::Button("CLEAR")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
+      // doSomething();
+    }                           
+      
+    ImGui::End();
+    
+}
+
+void MainComponent::drawCells(std::vector<std::vector<int>> arr) {
+
+  for (int x = 0; x < gridCountX; x++) {
+    for (int y = 0; y < gridCountY; y++) {
+      if (arr[x][y] == 1) {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      } else {
+        SDL_SetRenderDrawColor(renderer, 22, 22, 22, 255);
+      }
+
+      SDL_Rect cell;
+      cell.x = x * gridCellSize;
+      cell.y = y * gridCellSize;
+      cell.w = gridCellSize;
+      cell.h = gridCellSize;
+
+      SDL_RenderFillRect(renderer, &cell);
     }
-
-
-    // Rendering
-    ImGui::Render();
-    SDL_RenderClear(renderer);
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
-    SDL_RenderPresent(renderer);
   }
+}
 
-  // Cleanup 
-  ImGui_ImplSDLRenderer2_Shutdown();
-  ImGui_ImplSDL2_Shutdown();
-  ImGui::DestroyContext();
+void MainComponent::drawGridLines() {
+  SDL_SetRenderDrawColor(renderer, 44, 44, 44, 255);
 
+  int rightWall = 1 + gridCountX * gridCellSize;
+  int bottomWall = 1 + gridCountY * gridCellSize;
+
+  for (int x = 0; x < rightWall; x += gridCellSize) {
+    SDL_RenderDrawLine(renderer, x, 0, x, windowSizeY);
+  }
+  for (int y = 0; y < bottomWall; y += gridCellSize) {
+    SDL_RenderDrawLine(renderer, 0, y, windowSizeX, y);
+  }
+}
+
+MainComponent::~MainComponent() {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
 
-  SDL_Quit();
+  ImGui_ImplSDLRenderer2_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
+  ImGui::DestroyContext();
+}
 
-  return 0;
+
+int main(int argc, char *argv[]) {
+    MainComponent mainComponent;
+    GameOfLife gol;
+
+    std::vector<std::vector<int>> out(gridCountX, std::vector<int> (gridCountY, 0));
+
+
+    mainComponent.init();
+    gol.init();
+
+    // Infinite loop for application
+    bool gameIsRunning = true;
+    while (gameIsRunning) {
+
+      SDL_Event event;
+      while (SDL_PollEvent(&event)) {
+        ImGui_ImplSDL2_ProcessEvent(&event);
+        if (event.type == SDL_QUIT) { gameIsRunning = false; }
+        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(mainComponent.window)) { gameIsRunning = false; }
+      }   
+
+      mainComponent.menu();
+
+      SDL_Delay(10);
+
+      // out = gol.update();
+      
+      
+      // SDL_RenderClear(mainComponent.renderer);
+      
+
+      // mainComponent.drawCells(out);
+      mainComponent.drawGridLines();
+
+      mainComponent.update();
+      gol.swapArrays();
+    }
+
+    SDL_Quit();
+    return 0;
 }

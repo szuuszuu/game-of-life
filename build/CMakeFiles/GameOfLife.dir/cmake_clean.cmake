@@ -15,8 +15,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/GameOfLife.dir/imgui/imgui_widgets.cpp.o.d"
   "CMakeFiles/GameOfLife.dir/src/GOL.cpp.o"
   "CMakeFiles/GameOfLife.dir/src/GOL.cpp.o.d"
-  "CMakeFiles/GameOfLife.dir/src/menutest.cpp.o"
-  "CMakeFiles/GameOfLife.dir/src/menutest.cpp.o.d"
+  "CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o"
+  "CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o.d"
   "GameOfLife"
   "GameOfLife.pdb"
 )

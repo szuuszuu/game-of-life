@@ -17,7 +17,8 @@ class GameOfLife{
     void randomPopulation();
 
   public:
-    void init();
+    std::vector<std::vector<int>> init();
+    std::vector<std::vector<int>> clear();
     std::vector<std::vector<int>> update();
     void swapArrays();
     bool isAlive(

@@ -5,12 +5,20 @@
 #include <cstdlib>
 #include <time.h>
 #include <vector>
+#include <cstring>
 
 std::vector<std::vector<int>> display(gridCountX, std::vector<int> (gridCountY, 0));
 std::vector<std::vector<int>> swap(gridCountX, std::vector<int> (gridCountY, 0));
 
-void GameOfLife::init() {
+std::vector<std::vector<int>> GameOfLife::init() {
   randomPopulation();
+  return display;
+}
+
+std::vector<std::vector<int>> GameOfLife::clear() {
+  for(auto& v : display)
+    std::memset(&v[0], 0, sizeof(v[0]) * v.size());
+  return display;
 }
 
 void GameOfLife::randomPopulation() {
