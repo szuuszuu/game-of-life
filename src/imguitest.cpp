@@ -10,11 +10,6 @@
 #include <vector>
 #include <SDL2/SDL.h>
 
-#if !SDL_VERSION_ATLEAST(2,0,17)
-#error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
-#endif
-
-using namespace std;
 GameOfLife gol;
 
 bool startGame = false;
@@ -22,10 +17,10 @@ bool startGame = false;
 const static int SCREEN_WIDTH = 1280;
 const static int SCREEN_HEIGHT = 800;
 
-const int FPS = 20;
-// Uint32* buffer;
+int FPS = 30;
 
-void setup_imgui_context(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer)
+
+void setupImgui(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer)
 {
 	// Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -42,6 +37,15 @@ void setup_imgui_context(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer)
 
 }
 
+void cleanupImguiSDL(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer) {
+	ImGui_ImplSDLRenderer2_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
+
+	SDL_DestroyRenderer(sdl_renderer);
+	SDL_DestroyWindow(sdl_window);
+	SDL_Quit();
+}
 
 void drawCells(std::vector<std::vector<int>> arr, SDL_Renderer* renderer) {
 
@@ -53,11 +57,13 @@ void drawCells(std::vector<std::vector<int>> arr, SDL_Renderer* renderer) {
         SDL_SetRenderDrawColor(renderer, 22, 22, 22, 255);
       }
 
-      SDL_Rect cell;
-      cell.x = x * gridCellSize;
-      cell.y = y * gridCellSize;
-      cell.w = gridCellSize;
-      cell.h = gridCellSize;
+      SDL_Rect cell {
+		.x = x * gridCellSize,
+		.y = y * gridCellSize,
+		.w = gridCellSize,
+		.h = gridCellSize,
+	  };
+      
 
       SDL_RenderFillRect(renderer, &cell);
      }
@@ -124,8 +130,8 @@ void menu(int radioButtonIndex, int lastSelectedIndex, SDL_Renderer* renderer) {
 		} else if (radioButtonIndex == 2) {
 
 		}
-		ImGui::Text("RadioButtonID: %d", radioButtonIndex);
-		ImGui::Text("LastRadioButtonID: %d", lastSelectedIndex);
+		// ImGui::Text("RadioButtonID: %d", radioButtonIndex);
+		// ImGui::Text("LastRadioButtonID: %d", lastSelectedIndex);
 		lastSelectedIndex = radioButtonIndex;
 
 	}
@@ -149,9 +155,25 @@ void update(SDL_Window* window) {
 
 int main(int argc, char* argv[]) {
 
+	SDL_Rect gridCursor = {
+		.x = (gridCountX - 1) / 2 * gridCellSize,
+		.y = (gridCountY - 1) / 2 * gridCellSize,
+		.w = gridCellSize,
+		.h = gridCellSize,
+    };
+
+	SDL_Rect gridCursorGhost = {gridCursor.x, gridCursor.y, gridCellSize, gridCellSize};
+
+	SDL_Color gridCursorGhostColor = {44, 44, 44, 255};
+    SDL_Color gridCursorColor = {255, 255, 255, 255}; // White
+	
+	SDL_bool mouse_active = SDL_FALSE;
+    SDL_bool mouse_hover = SDL_FALSE;
+
+
+
 	SDL_Window* window;
 	SDL_Renderer* renderer;
-	SDL_Texture* texture;
 
 	// Setup SDL
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -159,7 +181,7 @@ int main(int argc, char* argv[]) {
 		printf("Error: %s\n", SDL_GetError());
 		return -1;
 	}
-	cout << "SDL Init succeeded." << endl;
+	std::cout << "SDL Init succeeded." << std::endl;
 
 	// Create window with SDL_Renderer graphics context
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE);
@@ -174,10 +196,13 @@ int main(int argc, char* argv[]) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
 
-	setup_imgui_context(window, renderer);
+	setupImgui(window, renderer);
 
 	int radioButtonIndex = 0;
 	int lastSelectedIndex = -1;
+
+	bool isStartClicked = 0;
+	bool isPauseClicked = 0;
 
 	std::vector<std::vector<int>> arr;
 
@@ -191,12 +216,25 @@ int main(int argc, char* argv[]) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			ImGui_ImplSDL2_ProcessEvent(&event);
-			if (event.type == SDL_QUIT)
-			{
-				cout << "Quit window event called. Closing the window." << endl;
-				return false;
-			}
+			switch (event.type) { 
+				case SDL_QUIT:
+					std::cout << "Quit window event called. Closing the window." << std::endl;
+					return false;
 
+				case SDL_MOUSEMOTION:
+					gridCursorGhost.x = (event.motion.x / gridCellSize) * gridCellSize;
+					gridCursorGhost.y = (event.motion.y / gridCellSize) * gridCellSize;
+
+					if (!mouse_active)
+						mouse_active = SDL_TRUE;
+					break;
+				case SDL_WINDOWEVENT:
+					if (event.window.event == SDL_WINDOWEVENT_ENTER && !mouse_hover)
+						mouse_hover = SDL_TRUE;
+					else if (event.window.event == SDL_WINDOWEVENT_LEAVE && mouse_hover)
+						mouse_hover = SDL_FALSE;
+					break;
+			}
 		}
 
 		// Start the Dear ImGui frame
@@ -216,32 +254,44 @@ int main(int argc, char* argv[]) {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		float width = 0.0f;
-		width += ImGui::CalcTextSize("START").x;
+		if (!isStartClicked) {
+			width += style.ItemSpacing.x;
+			width += ImGui::CalcTextSize("START").x;
+			width += 7.5f;
+		}
+		
 		width += style.ItemSpacing.x;
+		width += ImGui::CalcTextSize(isPauseClicked ? "RESUME" : "PAUSE").x;
 		width += 7.5f;
 		width += style.ItemSpacing.x;
-		width += ImGui::CalcTextSize("PAUSE").x;
-		width += 7.5f;
-		width += style.ItemSpacing.x;
-		width += ImGui::CalcTextSize("CLEAR").x;
+		width += ImGui::CalcTextSize("RESET").x;
 		alignForWidth(width);
 
-
-		if (ImGui::Button("START")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
-			startGame = true;
-		} 
-		ImGui::SameLine();
-		if (ImGui::Button("PAUSE")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
+		if (!isStartClicked) {
+			if (ImGui::Button("START")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
+				isStartClicked = 1;
+				startGame = true;
+			} 
+			ImGui::SameLine();
+		}
+		
+		if (ImGui::Button(isPauseClicked ? "RESUME" : "PAUSE")) {    // Buttons return true when clicked (most widgets return true when edited/activated)
+			isPauseClicked = !isPauseClicked;
 			startGame = false;
 		}  
 		ImGui::SameLine();
-		if (ImGui::Button("CLEAR")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
-			arr = gol.clear();
-			startGame = false;	
+		if (ImGui::Button("RESET")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
+			if (radioButtonIndex == 0) {
+				isStartClicked = 0;
+				arr = gol.init();
+			} else if(radioButtonIndex == 1) {
+				arr = gol.clear();	
+			}
+			startGame = false;
 		} 
 
-		ImGui::Text("RadioButtonID: %d", radioButtonIndex);
-		ImGui::Text("LastRadioButtonID: %d", lastSelectedIndex);
+		ImGui::Text("Cursor x: %d", gridCursorGhost.x);
+		ImGui::Text("Cursor y: %d", gridCursorGhost.y);
 		if (radioButtonIndex != lastSelectedIndex) {
 			startGame = false; // idk czy to zostawić tutaj
 			if (radioButtonIndex == 0) {
@@ -251,9 +301,7 @@ int main(int argc, char* argv[]) {
 			} else if (radioButtonIndex == 2) {
 
 			}
-
 			lastSelectedIndex = radioButtonIndex;
-
 		}
 
 		if (startGame) {
@@ -270,6 +318,14 @@ int main(int argc, char* argv[]) {
 		drawCells(arr, renderer);
 		drawGridLines(renderer);
 
+		if (mouse_active && mouse_hover) {
+            SDL_SetRenderDrawColor(renderer, gridCursorGhostColor.r,
+                                   gridCursorGhostColor.g,
+                                   gridCursorGhostColor.b,
+                                   gridCursorGhostColor.a);
+            SDL_RenderFillRect(renderer, &gridCursorGhost);
+        }
+
 		endTime = SDL_GetTicks();
         frameTime = endTime - startTime;
         if (frameTime < desiredFrameTime) {
@@ -279,14 +335,5 @@ int main(int argc, char* argv[]) {
 		update(window);
 	}
 
-	// Cleanup
-	ImGui_ImplSDLRenderer2_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
-	ImGui::DestroyContext();
-
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyTexture(texture);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-
+	cleanupImguiSDL(window, renderer);
 }
