@@ -8,6 +8,7 @@
 // general headers
 #include <iostream>
 #include <vector>
+#include <cstring>
 #include <SDL2/SDL.h>
 
 GameOfLife gol;
@@ -18,7 +19,6 @@ const static int SCREEN_WIDTH = 1280;
 const static int SCREEN_HEIGHT = 800;
 
 int FPS = 30;
-
 
 void setupImgui(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer)
 {
@@ -153,6 +153,7 @@ void update(SDL_Window* window) {
 	SDL_RenderClear(renderer);
 }
 
+
 int main(int argc, char* argv[]) {
 
 	SDL_Rect gridCursor = {
@@ -204,6 +205,9 @@ int main(int argc, char* argv[]) {
 	bool isStartClicked = 0;
 	bool isPauseClicked = 0;
 
+	int arrX = 0;
+	int arrY = 0;
+
 	std::vector<std::vector<int>> arr;
 
 	Uint32 startTime, endTime, frameTime;
@@ -218,15 +222,19 @@ int main(int argc, char* argv[]) {
 			ImGui_ImplSDL2_ProcessEvent(&event);
 			switch (event.type) { 
 				case SDL_QUIT:
-					std::cout << "Quit window event called. Closing the window." << std::endl;
 					return false;
-
+				case SDL_MOUSEBUTTONDOWN:
+					if (gridCursorGhost.x < size_x && gridCursorGhost.y < size_y) {
+						arrX = gridCursorGhost.x/gridCellSize;
+						arrY = gridCursorGhost.y/gridCellSize;
+					} else {
+						break;
+					}
+					arr = gol.changeState(arrX, arrY);
+					break;
 				case SDL_MOUSEMOTION:
 					gridCursorGhost.x = (event.motion.x / gridCellSize) * gridCellSize;
 					gridCursorGhost.y = (event.motion.y / gridCellSize) * gridCellSize;
-
-					if (!mouse_active)
-						mouse_active = SDL_TRUE;
 					break;
 				case SDL_WINDOWEVENT:
 					if (event.window.event == SDL_WINDOWEVENT_ENTER && !mouse_hover)
@@ -277,23 +285,32 @@ int main(int argc, char* argv[]) {
 		
 		if (ImGui::Button(isPauseClicked ? "RESUME" : "PAUSE")) {    // Buttons return true when clicked (most widgets return true when edited/activated)
 			isPauseClicked = !isPauseClicked;
-			startGame = false;
+			startGame = isPauseClicked ? false : true;
 		}  
 		ImGui::SameLine();
 		if (ImGui::Button("RESET")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
+			isStartClicked = false;
+			isPauseClicked = false;
 			if (radioButtonIndex == 0) {
-				isStartClicked = 0;
 				arr = gol.init();
 			} else if(radioButtonIndex == 1) {
 				arr = gol.clear();	
 			}
 			startGame = false;
 		} 
+		
+
+		ImGui::Text("Array x: %d", arrX);
+		ImGui::Text("Array y: %d", arrY);
+
 
 		ImGui::Text("Cursor x: %d", gridCursorGhost.x);
 		ImGui::Text("Cursor y: %d", gridCursorGhost.y);
 		if (radioButtonIndex != lastSelectedIndex) {
 			startGame = false; // idk czy to zostawić tutaj
+			isStartClicked = false;
+			isPauseClicked = false;
+			arr = gol.clear();
 			if (radioButtonIndex == 0) {
 				arr = gol.init();
 			} else if (radioButtonIndex == 1) {
@@ -318,7 +335,7 @@ int main(int argc, char* argv[]) {
 		drawCells(arr, renderer);
 		drawGridLines(renderer);
 
-		if (mouse_active && mouse_hover) {
+		if (mouse_hover) {
             SDL_SetRenderDrawColor(renderer, gridCursorGhostColor.r,
                                    gridCursorGhostColor.g,
                                    gridCursorGhostColor.b,

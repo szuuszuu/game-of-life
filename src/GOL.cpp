@@ -21,6 +21,13 @@ std::vector<std::vector<int>> GameOfLife::clear() {
   return display;
 }
 
+std::vector<std::vector<int>> GameOfLife::changeState(int x, int y) {
+  if (x < size_x && y < size_y) {
+    display[x][y] = display[x][y] ? 0 : 1;
+  }
+  return display;
+}
+
 void GameOfLife::randomPopulation() {
   srand(time(NULL));
 
