@@ -7,6 +7,8 @@
 
 // general headers
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include <cstring>
 #include <SDL2/SDL.h>
@@ -90,6 +92,36 @@ void alignForWidth(float width, float alignment = 0.5f) {
   float off = (avail - width) * alignment;
   if (off > 0.0f) { ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off); }
 
+}
+
+std::vector<std::vector<int>> importData(std::vector<std::vector<int>> arr) {
+	std::string line;
+	std::string fileName = "data.txt";
+    std::string path = "../" + fileName;
+	std::ifstream myFileStream(path);
+
+	if (!myFileStream) {
+        std::cerr<<"Error: Missing file named "<<fileName<<std::endl;
+		exit(EXIT_SUCCESS);
+	}
+
+	while (getline(myFileStream, line)) {
+        std::istringstream iss(line);
+        int x, y;
+        if (!(iss >> x >> y)) {
+            std::cerr<<"Error: Invalid line format: "<<line<<std::endl;
+            continue;
+        }
+
+		if (x < gridCountX && y < gridCountY) {
+			arr[x][y] = 1;
+		} else {
+            std::cerr<<"Error: Point out of reach: "<<line<<std::endl;
+        }
+    }
+
+	myFileStream.close();
+	return arr;
 }
 
 void menu(int radioButtonIndex, int lastSelectedIndex, SDL_Renderer* renderer) {
@@ -293,9 +325,12 @@ int main(int argc, char* argv[]) {
 			isPauseClicked = false;
 			if (radioButtonIndex == 0) {
 				arr = gol.init();
-			} else if(radioButtonIndex == 1) {
-				arr = gol.clear();	
+			} else if (radioButtonIndex == 2){
+				arr = importData(arr);
+			} else {
+				arr = gol.clear();
 			}
+
 			startGame = false;
 		} 
 		
@@ -314,9 +349,9 @@ int main(int argc, char* argv[]) {
 			if (radioButtonIndex == 0) {
 				arr = gol.init();
 			} else if (radioButtonIndex == 1) {
-			
+				arr = gol.clear();
 			} else if (radioButtonIndex == 2) {
-
+				arr = importData(arr);
 			}
 			lastSelectedIndex = radioButtonIndex;
 		}
