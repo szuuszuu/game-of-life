@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
+#include "imfilebrowser.h"
 
 // general headers
 #include <iostream>
@@ -94,10 +95,9 @@ void alignForWidth(float width, float alignment = 0.5f) {
 
 }
 
-std::vector<std::vector<int>> importData(std::vector<std::vector<int>> arr) {
+std::vector<std::vector<int>> importData(std::vector<std::vector<int>> arr, std::string fileName) {
 	std::string line;
-	std::string fileName = "data.txt";
-    std::string path = "../" + fileName;
+    std::string path = fileName;
 	std::ifstream myFileStream(path);
 
 	if (!myFileStream) {
@@ -188,6 +188,10 @@ void update(SDL_Window* window) {
 
 int main(int argc, char* argv[]) {
 
+	ImGui::FileBrowser fileDialog;
+	fileDialog.SetTitle("title");
+    fileDialog.SetTypeFilters({ ".txt"});
+
 	SDL_Rect gridCursor = {
 		.x = (gridCountX - 1) / 2 * gridCellSize,
 		.y = (gridCountY - 1) / 2 * gridCellSize,
@@ -234,13 +238,21 @@ int main(int argc, char* argv[]) {
 	int radioButtonIndex = 0;
 	int lastSelectedIndex = -1;
 
+	int iterations = 0;
+
 	bool isStartClicked = 0;
 	bool isPauseClicked = 0;
+	bool isImportClicked = 0;
+
+	bool clickMode = 1;
+
+	std::string path = "";
 
 	int arrX = 0;
 	int arrY = 0;
 
-	std::vector<std::vector<int>> arr;
+	std::vector<std::vector<int>> arr = gol.clear();
+	std::vector<std::vector<int>> arrImported = gol.clear();
 
 	Uint32 startTime, endTime, frameTime;
     const int desiredFrameTime = 1000 / FPS;
@@ -256,7 +268,7 @@ int main(int argc, char* argv[]) {
 				case SDL_QUIT:
 					return false;
 				case SDL_MOUSEBUTTONDOWN:
-					if (gridCursorGhost.x < size_x && gridCursorGhost.y < size_y) {
+					if (clickMode && gridCursorGhost.x < size_x && gridCursorGhost.y < size_y) {
 						arrX = gridCursorGhost.x/gridCellSize;
 						arrY = gridCursorGhost.y/gridCellSize;
 					} else {
@@ -321,18 +333,40 @@ int main(int argc, char* argv[]) {
 		}  
 		ImGui::SameLine();
 		if (ImGui::Button("RESET")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
+			startGame = false;
 			isStartClicked = false;
 			isPauseClicked = false;
+			iterations = 0;
 			if (radioButtonIndex == 0) {
 				arr = gol.init();
 			} else if (radioButtonIndex == 2){
-				arr = importData(arr);
+				arr = gol.clear();
+				arr = arrImported;
 			} else {
 				arr = gol.clear();
 			}
-
-			startGame = false;
 		} 
+		
+		
+		if (isImportClicked) {
+			width = 0.0f;
+			width += style.ItemSpacing.x;
+			width += ImGui::CalcTextSize("CLEAR").x;
+			width += 7.5f;
+			width += style.ItemSpacing.x;
+			width += ImGui::CalcTextSize("Import .txt file").x;
+			alignForWidth(width);
+
+			if (ImGui::Button("CLEAR")) {
+				arrImported = gol.clear();
+				arr = arrImported;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Import .txt file")) {
+				clickMode = false;
+				fileDialog.Open();
+			}
+		}
 		
 
 		ImGui::Text("Array x: %d", arrX);
@@ -345,13 +379,15 @@ int main(int argc, char* argv[]) {
 			startGame = false; // idk czy to zostawić tutaj
 			isStartClicked = false;
 			isPauseClicked = false;
+			isImportClicked = false;
 			arr = gol.clear();
 			if (radioButtonIndex == 0) {
 				arr = gol.init();
 			} else if (radioButtonIndex == 1) {
 				arr = gol.clear();
 			} else if (radioButtonIndex == 2) {
-				arr = importData(arr);
+				isImportClicked = true;
+				arr = arrImported;
 			}
 			lastSelectedIndex = radioButtonIndex;
 		}
@@ -359,14 +395,29 @@ int main(int argc, char* argv[]) {
 		if (startGame) {
 			arr = gol.update();
 			gol.swapArrays();
+			iterations++;
 		}
 
+		ImGui::Text("ClickMode: %d", clickMode);
+		ImGui::Text("Iterations: %d", iterations);
 		ImGui::Text("GameStatus: %d", startGame);
 		ImGui::End();
 
 
-		// menu(radioButtonIndex, lastSelectedIndex, renderer);
-		
+		fileDialog.Display();
+        
+        if (fileDialog.HasSelected()) {
+			path = fileDialog.GetSelected().string();
+			arrImported = gol.clear();
+			arrImported = importData(arrImported, path);
+			arr = arrImported;
+            fileDialog.ClearSelected();
+        }
+
+		if (!fileDialog.IsOpened()) {
+			clickMode = true;
+		}
+
 		drawCells(arr, renderer);
 		drawGridLines(renderer);
 
