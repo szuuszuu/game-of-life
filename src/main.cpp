@@ -19,12 +19,11 @@ GameOfLife gol;
 bool startGame = false;
 
 const static int SCREEN_WIDTH = 1280;
-const static int SCREEN_HEIGHT = 800;
+const static int SCREEN_HEIGHT = 720;
 
-int FPS = 30;
+int FPS = 20;
 
-void setupImgui(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer)
-{
+void setupImgui(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer) {
 	// Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -37,7 +36,6 @@ void setupImgui(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer)
 	// Setup Platform/Renderer backends
 	ImGui_ImplSDL2_InitForSDLRenderer(sdl_window, sdl_renderer);
 	ImGui_ImplSDLRenderer2_Init(sdl_renderer);
-
 }
 
 void cleanupImguiSDL(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer) {
@@ -50,41 +48,47 @@ void cleanupImguiSDL(SDL_Window* sdl_window, SDL_Renderer* sdl_renderer) {
 	SDL_Quit();
 }
 
-void drawCells(std::vector<std::vector<int>> arr, SDL_Renderer* renderer) {
+void drawCells(std::vector<std::vector<int>> arr, SDL_Renderer* sdl_renderer) {
 
   for (int x = 0; x < gridCountX; x++) {
     for (int y = 0; y < gridCountY; y++) {
       if (arr[x][y] == 1) {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 255, 255);
       } else {
-        SDL_SetRenderDrawColor(renderer, 22, 22, 22, 255);
+        SDL_SetRenderDrawColor(sdl_renderer, 22, 22, 22, 255);
       }
 
       SDL_Rect cell {
-		.x = x * gridCellSize,
-		.y = y * gridCellSize,
-		.w = gridCellSize,
-		.h = gridCellSize,
-	  };
+				.x = x * gridCellSize,
+				.y = y * gridCellSize,
+				.w = gridCellSize,
+				.h = gridCellSize,
+			};
       
-
-      SDL_RenderFillRect(renderer, &cell);
+      SDL_RenderFillRect(sdl_renderer, &cell);
      }
     }
 }
 
-void drawGridLines(SDL_Renderer* renderer) {
-  SDL_SetRenderDrawColor(renderer, 44, 44, 44, 255);
+void drawGridLines(SDL_Renderer* sdl_renderer) {
+  SDL_SetRenderDrawColor(sdl_renderer, 44, 44, 44, 255);
 
   int rightWall = 1 + gridCountX * gridCellSize;
   int bottomWall = 1 + gridCountY * gridCellSize;
 
   for (int x = 0; x < rightWall; x += gridCellSize) {
-    SDL_RenderDrawLine(renderer, x, 0, x, SCREEN_WIDTH);
+    SDL_RenderDrawLine(sdl_renderer, x, 0, x, SCREEN_WIDTH);
   }
   for (int y = 0; y < bottomWall; y += gridCellSize) {
-    SDL_RenderDrawLine(renderer, 0, y, SCREEN_WIDTH, y);
+    SDL_RenderDrawLine(sdl_renderer, 0, y, SCREEN_WIDTH, y);
   }
+}
+
+float calculateOffset(ImGuiStyle& style, float width, std::string name) {
+	width += style.ItemSpacing.x;
+	width += ImGui::CalcTextSize(name.c_str()).x;
+	width += 7.5f;
+	return width;
 }
 
 void alignForWidth(float width, float alignment = 0.5f) {
@@ -92,13 +96,11 @@ void alignForWidth(float width, float alignment = 0.5f) {
   float avail = ImGui::GetContentRegionAvail().x;
   float off = (avail - width) * alignment;
   if (off > 0.0f) { ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off); }
-
 }
 
 std::vector<std::vector<int>> importData(std::vector<std::vector<int>> arr, std::string fileName) {
 	std::string line;
-    std::string path = fileName;
-	std::ifstream myFileStream(path);
+	std::ifstream myFileStream(fileName);
 
 	if (!myFileStream) {
         std::cerr<<"Error: Missing file named "<<fileName<<std::endl;
@@ -124,103 +126,32 @@ std::vector<std::vector<int>> importData(std::vector<std::vector<int>> arr, std:
 	return arr;
 }
 
-void menu(int radioButtonIndex, int lastSelectedIndex, SDL_Renderer* renderer) {
-
-	ImGui::Begin("Game Of Life");
-
-	ImGui::Text("Choose your population:");
-
-	ImGui::RadioButton("Random population", &radioButtonIndex, 0);
-	ImGui::RadioButton("Choose population via clicking cells", &radioButtonIndex, 1);
-	ImGui::RadioButton("Import population via .txt file", &radioButtonIndex, 2);
-
-
-	ImGuiStyle& style = ImGui::GetStyle();
-	float width = 0.0f;
-	width += ImGui::CalcTextSize("START").x;
-	width += style.ItemSpacing.x;
-	width += 7.5f;
-	width += style.ItemSpacing.x;
-	width += ImGui::CalcTextSize("CLEAR").x;
-	alignForWidth(width);
-
-
-	if (ImGui::Button("START")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
-		startGame = true;
-	}  
-	ImGui::SameLine();
-	if (ImGui::Button("CLEAR")) {                          // Buttons return true when clicked (most widgets return true when edited/activated)
-		startGame = false;
-	} 
-
-
-	if (radioButtonIndex != lastSelectedIndex) {
-		if (radioButtonIndex == 0) {
-			drawCells(gol.init(), renderer);
-		} else if (radioButtonIndex == 1) {
-		
-		} else if (radioButtonIndex == 2) {
-
-		}
-		// ImGui::Text("RadioButtonID: %d", radioButtonIndex);
-		// ImGui::Text("LastRadioButtonID: %d", lastSelectedIndex);
-		lastSelectedIndex = radioButtonIndex;
-
-	}
-
-	if (startGame) {
-		drawCells(gol.update(), renderer);
-	}
-
-	ImGui::End();
-}
-
-void update(SDL_Window* window) {
-
+void update(SDL_Window* sdl_window) {
 	ImGui::Render();
-	SDL_Renderer* renderer = SDL_GetRenderer(window);
+	SDL_Renderer* sdl_renderer = SDL_GetRenderer(sdl_window);
 	
 	ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
-	SDL_RenderPresent(renderer);
-	SDL_RenderClear(renderer);
+	SDL_RenderPresent(sdl_renderer);
+	SDL_RenderClear(sdl_renderer);
 }
 
 
 int main(int argc, char* argv[]) {
 
+	// Setup file dialog library
 	ImGui::FileBrowser fileDialog;
 	fileDialog.SetTitle("title");
-    fileDialog.SetTypeFilters({ ".txt"});
+	fileDialog.SetTypeFilters({ ".txt"});
 
-	SDL_Rect gridCursor = {
-		.x = (gridCountX - 1) / 2 * gridCellSize,
-		.y = (gridCountY - 1) / 2 * gridCellSize,
-		.w = gridCellSize,
-		.h = gridCellSize,
-    };
-
-	SDL_Rect gridCursorGhost = {gridCursor.x, gridCursor.y, gridCellSize, gridCellSize};
-
-	SDL_Color gridCursorGhostColor = {44, 44, 44, 255};
-    SDL_Color gridCursorColor = {255, 255, 255, 255}; // White
-	
-	SDL_bool mouse_active = SDL_FALSE;
-    SDL_bool mouse_hover = SDL_FALSE;
-
-
-
+	// Setup SDL and ImGui
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 
-	// Setup SDL
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
-	{
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
 		printf("Error: %s\n", SDL_GetError());
 		return -1;
 	}
-	std::cout << "SDL Init succeeded." << std::endl;
 
-	// Create window with SDL_Renderer graphics context
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE);
 	window = SDL_CreateWindow(
 		"My Window",
@@ -232,8 +163,18 @@ int main(int argc, char* argv[]) {
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
-
 	setupImgui(window, renderer);
+
+	// Setup for cursor
+	SDL_Rect gridCursor = {
+		.x = (gridCountX - 1) / 2 * gridCellSize,
+		.y = (gridCountY - 1) / 2 * gridCellSize,
+		.w = gridCellSize,
+		.h = gridCellSize,
+    };
+	SDL_Color gridCursorColor = {44, 44, 44, 255};
+	SDL_bool mouse_hover = SDL_FALSE;
+
 
 	int radioButtonIndex = 0;
 	int lastSelectedIndex = -1;
@@ -255,7 +196,7 @@ int main(int argc, char* argv[]) {
 	std::vector<std::vector<int>> arrImported = gol.clear();
 
 	Uint32 startTime, endTime, frameTime;
-    const int desiredFrameTime = 1000 / FPS;
+	const int desiredFrameTime = 1000 / FPS;
 
 	while (true)
 	{
@@ -268,17 +209,17 @@ int main(int argc, char* argv[]) {
 				case SDL_QUIT:
 					return false;
 				case SDL_MOUSEBUTTONDOWN:
-					if (clickMode && gridCursorGhost.x < size_x && gridCursorGhost.y < size_y) {
-						arrX = gridCursorGhost.x/gridCellSize;
-						arrY = gridCursorGhost.y/gridCellSize;
+					if (clickMode && gridCursor.x < size_x && gridCursor.y < size_y) {
+						arrX = gridCursor.x/gridCellSize;
+						arrY = gridCursor.y/gridCellSize;
 					} else {
 						break;
 					}
 					arr = gol.changeState(arrX, arrY);
 					break;
 				case SDL_MOUSEMOTION:
-					gridCursorGhost.x = (event.motion.x / gridCellSize) * gridCellSize;
-					gridCursorGhost.y = (event.motion.y / gridCellSize) * gridCellSize;
+					gridCursor.x = (event.motion.x / gridCellSize) * gridCellSize;
+					gridCursor.y = (event.motion.y / gridCellSize) * gridCellSize;
 					break;
 				case SDL_WINDOWEVENT:
 					if (event.window.event == SDL_WINDOWEVENT_ENTER && !mouse_hover)
@@ -305,18 +246,11 @@ int main(int argc, char* argv[]) {
 
 
 		ImGuiStyle& style = ImGui::GetStyle();
+
 		float width = 0.0f;
-		if (!isStartClicked) {
-			width += style.ItemSpacing.x;
-			width += ImGui::CalcTextSize("START").x;
-			width += 7.5f;
-		}
-		
-		width += style.ItemSpacing.x;
-		width += ImGui::CalcTextSize(isPauseClicked ? "RESUME" : "PAUSE").x;
-		width += 7.5f;
-		width += style.ItemSpacing.x;
-		width += ImGui::CalcTextSize("RESET").x;
+		if (!isStartClicked) { width = calculateOffset(style, width, "START");}
+		width = calculateOffset(style, width, (isPauseClicked ? "RESUME" : "PAUSE"));
+		width = calculateOffset(style, width, "RESET");
 		alignForWidth(width);
 
 		if (!isStartClicked) {
@@ -350,11 +284,8 @@ int main(int argc, char* argv[]) {
 		
 		if (isImportClicked) {
 			width = 0.0f;
-			width += style.ItemSpacing.x;
-			width += ImGui::CalcTextSize("CLEAR").x;
-			width += 7.5f;
-			width += style.ItemSpacing.x;
-			width += ImGui::CalcTextSize("Import .txt file").x;
+			width = calculateOffset(style, width, "CLEAR");
+			width = calculateOffset(style, width, "Import .txt file");
 			alignForWidth(width);
 
 			if (ImGui::Button("CLEAR")) {
@@ -367,14 +298,9 @@ int main(int argc, char* argv[]) {
 				fileDialog.Open();
 			}
 		}
-		
 
-		ImGui::Text("Array x: %d", arrX);
-		ImGui::Text("Array y: %d", arrY);
-
-
-		ImGui::Text("Cursor x: %d", gridCursorGhost.x);
-		ImGui::Text("Cursor y: %d", gridCursorGhost.y);
+		ImGui::Text("Cursor x: %d", gridCursor.x);
+		ImGui::Text("Cursor y: %d", gridCursor.y);
 		if (radioButtonIndex != lastSelectedIndex) {
 			startGame = false; // idk czy to zostawić tutaj
 			isStartClicked = false;
@@ -398,21 +324,19 @@ int main(int argc, char* argv[]) {
 			iterations++;
 		}
 
-		ImGui::Text("ClickMode: %d", clickMode);
 		ImGui::Text("Iterations: %d", iterations);
-		ImGui::Text("GameStatus: %d", startGame);
 		ImGui::End();
 
 
 		fileDialog.Display();
         
-        if (fileDialog.HasSelected()) {
+		if (fileDialog.HasSelected()) {
 			path = fileDialog.GetSelected().string();
 			arrImported = gol.clear();
 			arrImported = importData(arrImported, path);
 			arr = arrImported;
-            fileDialog.ClearSelected();
-        }
+			fileDialog.ClearSelected();
+		}
 
 		if (!fileDialog.IsOpened()) {
 			clickMode = true;
@@ -422,21 +346,23 @@ int main(int argc, char* argv[]) {
 		drawGridLines(renderer);
 
 		if (mouse_hover) {
-            SDL_SetRenderDrawColor(renderer, gridCursorGhostColor.r,
-                                   gridCursorGhostColor.g,
-                                   gridCursorGhostColor.b,
-                                   gridCursorGhostColor.a);
-            SDL_RenderFillRect(renderer, &gridCursorGhost);
-        }
+			SDL_SetRenderDrawColor(renderer, gridCursorColor.r,
+			gridCursorColor.g,
+			gridCursorColor.b,
+			gridCursorColor.a);
+
+			SDL_RenderFillRect(renderer, &gridCursor);
+		}
 
 		endTime = SDL_GetTicks();
-        frameTime = endTime - startTime;
-        if (frameTime < desiredFrameTime) {
-            SDL_Delay(desiredFrameTime - frameTime);
-        }
+		frameTime = endTime - startTime;
+		if (frameTime < desiredFrameTime) {
+				SDL_Delay(desiredFrameTime - frameTime);
+		}
 
 		update(window);
 	}
 
 	cleanupImguiSDL(window, renderer);
+	return 0;
 }

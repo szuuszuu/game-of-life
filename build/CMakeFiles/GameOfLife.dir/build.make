@@ -69,19 +69,19 @@ include CMakeFiles/GameOfLife.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/GameOfLife.dir/flags.make
 
-CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o: CMakeFiles/GameOfLife.dir/flags.make
-CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o: ../src/imguitest.cpp
-CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o: CMakeFiles/GameOfLife.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/szuszu/github/game-of-life/Game-Of-Life/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o -MF CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o.d -o CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o -c /home/szuszu/github/game-of-life/Game-Of-Life/src/imguitest.cpp
+CMakeFiles/GameOfLife.dir/src/main.cpp.o: CMakeFiles/GameOfLife.dir/flags.make
+CMakeFiles/GameOfLife.dir/src/main.cpp.o: ../src/main.cpp
+CMakeFiles/GameOfLife.dir/src/main.cpp.o: CMakeFiles/GameOfLife.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/szuszu/github/game-of-life/Game-Of-Life/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/GameOfLife.dir/src/main.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameOfLife.dir/src/main.cpp.o -MF CMakeFiles/GameOfLife.dir/src/main.cpp.o.d -o CMakeFiles/GameOfLife.dir/src/main.cpp.o -c /home/szuszu/github/game-of-life/Game-Of-Life/src/main.cpp
 
-CMakeFiles/GameOfLife.dir/src/imguitest.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/GameOfLife.dir/src/imguitest.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/szuszu/github/game-of-life/Game-Of-Life/src/imguitest.cpp > CMakeFiles/GameOfLife.dir/src/imguitest.cpp.i
+CMakeFiles/GameOfLife.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/GameOfLife.dir/src/main.cpp.i"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/szuszu/github/game-of-life/Game-Of-Life/src/main.cpp > CMakeFiles/GameOfLife.dir/src/main.cpp.i
 
-CMakeFiles/GameOfLife.dir/src/imguitest.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/GameOfLife.dir/src/imguitest.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/szuszu/github/game-of-life/Game-Of-Life/src/imguitest.cpp -o CMakeFiles/GameOfLife.dir/src/imguitest.cpp.s
+CMakeFiles/GameOfLife.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/GameOfLife.dir/src/main.cpp.s"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/szuszu/github/game-of-life/Game-Of-Life/src/main.cpp -o CMakeFiles/GameOfLife.dir/src/main.cpp.s
 
 CMakeFiles/GameOfLife.dir/src/GOL.cpp.o: CMakeFiles/GameOfLife.dir/flags.make
 CMakeFiles/GameOfLife.dir/src/GOL.cpp.o: ../src/GOL.cpp
@@ -197,7 +197,7 @@ CMakeFiles/GameOfLife.dir/imgui/imgui.cpp.s: cmake_force
 
 # Object files for target GameOfLife
 GameOfLife_OBJECTS = \
-"CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o" \
+"CMakeFiles/GameOfLife.dir/src/main.cpp.o" \
 "CMakeFiles/GameOfLife.dir/src/GOL.cpp.o" \
 "CMakeFiles/GameOfLife.dir/imgui/imgui_demo.cpp.o" \
 "CMakeFiles/GameOfLife.dir/imgui/imgui_draw.cpp.o" \
@@ -210,7 +210,7 @@ GameOfLife_OBJECTS = \
 # External object files for target GameOfLife
 GameOfLife_EXTERNAL_OBJECTS =
 
-GameOfLife: CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o
+GameOfLife: CMakeFiles/GameOfLife.dir/src/main.cpp.o
 GameOfLife: CMakeFiles/GameOfLife.dir/src/GOL.cpp.o
 GameOfLife: CMakeFiles/GameOfLife.dir/imgui/imgui_demo.cpp.o
 GameOfLife: CMakeFiles/GameOfLife.dir/imgui/imgui_draw.cpp.o

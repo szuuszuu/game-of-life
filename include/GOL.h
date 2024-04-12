@@ -2,10 +2,9 @@
 #define GOL_H
 
 #include <iostream>
-#include <algorithm>
-#include <cstdlib>
-#include <vector>
 #include <time.h>
+#include <vector>
+#include <cstring>
 
 const int gridCountX = 50;
 const int gridCountY = 50;

@@ -321,29 +321,29 @@ src/GOL.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/GOL.cpp.s
 .PHONY : src/GOL.cpp.s
 
-src/imguitest.o: src/imguitest.cpp.o
-.PHONY : src/imguitest.o
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
 
 # target to build an object file
-src/imguitest.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/imguitest.cpp.o
-.PHONY : src/imguitest.cpp.o
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
 
-src/imguitest.i: src/imguitest.cpp.i
-.PHONY : src/imguitest.i
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
 
 # target to preprocess a source file
-src/imguitest.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/imguitest.cpp.i
-.PHONY : src/imguitest.cpp.i
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
 
-src/imguitest.s: src/imguitest.cpp.s
-.PHONY : src/imguitest.s
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
 
 # target to generate assembly for a file
-src/imguitest.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/imguitest.cpp.s
-.PHONY : src/imguitest.cpp.s
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
 # Help Target
 help:
@@ -378,9 +378,9 @@ help:
 	@echo "... src/GOL.o"
 	@echo "... src/GOL.i"
 	@echo "... src/GOL.s"
-	@echo "... src/imguitest.o"
-	@echo "... src/imguitest.i"
-	@echo "... src/imguitest.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 .PHONY : help
 
 

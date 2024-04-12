@@ -1,31 +1,25 @@
 #include "GOL.h"
 
-#include <iostream>
-#include <algorithm>
-#include <cstdlib>
-#include <time.h>
-#include <vector>
-#include <cstring>
 
-std::vector<std::vector<int>> display(gridCountX, std::vector<int> (gridCountY, 0));
+std::vector<std::vector<int>> array(gridCountX, std::vector<int> (gridCountY, 0));
 std::vector<std::vector<int>> swap(gridCountX, std::vector<int> (gridCountY, 0));
 
 std::vector<std::vector<int>> GameOfLife::init() {
   randomPopulation();
-  return display;
+  return array;
 }
 
 std::vector<std::vector<int>> GameOfLife::clear() {
-  for(auto& v : display)
+  for(auto& v : array)
     std::memset(&v[0], 0, sizeof(v[0]) * v.size());
-  return display;
+  return array;
 }
 
 std::vector<std::vector<int>> GameOfLife::changeState(int x, int y) {
   if (x < size_x && y < size_y) {
-    display[x][y] = display[x][y] ? 0 : 1;
+    array[x][y] = array[x][y] ? 0 : 1;
   }
-  return display;
+  return array;
 }
 
 void GameOfLife::randomPopulation() {
@@ -34,9 +28,9 @@ void GameOfLife::randomPopulation() {
   for (int x = 0; x < gridCountX; x++) {
     for (int y = 0; y < gridCountY; y++) {
       if (rand() % 5 == 1) { 
-        display[x][y] = 1;
+        array[x][y] = 1;
       } else {
-        display[x][y] = 0;
+        array[x][y] = 0;
       }
     }
   }
@@ -47,15 +41,14 @@ std::vector<std::vector<int>> GameOfLife::update() {
   
   for (int x = 0; x < gridCountX; x++) {
     for (int y = 0; y < gridCountY; y++) {
-      swap[x][y] = isAlive(x, y, display) ? 1 : 0;
+      swap[x][y] = isAlive(x, y, array) ? 1 : 0;
     }
   }  
-
   return swap;
 }
 
 void GameOfLife::swapArrays() {
-  std::copy(swap.begin(), swap.end(), display.begin());
+  std::copy(swap.begin(), swap.end(), array.begin());
 }
 
 bool GameOfLife::isAlive(int x, int y, std::vector<std::vector<int>> arr) {
