@@ -321,6 +321,30 @@ src/GOL.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/GOL.cpp.s
 .PHONY : src/GOL.cpp.s
 
+src/imgui-sdl2.o: src/imgui-sdl2.cpp.o
+.PHONY : src/imgui-sdl2.o
+
+# target to build an object file
+src/imgui-sdl2.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/imgui-sdl2.cpp.o
+.PHONY : src/imgui-sdl2.cpp.o
+
+src/imgui-sdl2.i: src/imgui-sdl2.cpp.i
+.PHONY : src/imgui-sdl2.i
+
+# target to preprocess a source file
+src/imgui-sdl2.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/imgui-sdl2.cpp.i
+.PHONY : src/imgui-sdl2.cpp.i
+
+src/imgui-sdl2.s: src/imgui-sdl2.cpp.s
+.PHONY : src/imgui-sdl2.s
+
+# target to generate assembly for a file
+src/imgui-sdl2.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/GameOfLife.dir/build.make CMakeFiles/GameOfLife.dir/src/imgui-sdl2.cpp.s
+.PHONY : src/imgui-sdl2.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -378,6 +402,9 @@ help:
 	@echo "... src/GOL.o"
 	@echo "... src/GOL.i"
 	@echo "... src/GOL.s"
+	@echo "... src/imgui-sdl2.o"
+	@echo "... src/imgui-sdl2.i"
+	@echo "... src/imgui-sdl2.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

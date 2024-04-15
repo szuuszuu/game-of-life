@@ -4,6 +4,7 @@ project(GameOfLife VERSION 0.1.0 LANGUAGES C CXX)
 set(SOURCE_FILES
     src/main.cpp
     src/GOL.cpp
+    src/imgui-sdl2.cpp
     imgui/imgui_demo.cpp
     imgui/imgui_draw.cpp
     imgui/imgui_impl_sdl2.cpp

@@ -11,6 +11,11 @@
 },
 {
   "directory": "/home/szuszu/github/game-of-life/Game-Of-Life/build",
+  "command": "/usr/bin/g++  -I/home/szuszu/github/game-of-life/Game-Of-Life/include -g -o CMakeFiles/GameOfLife.dir/src/imgui-sdl2.cpp.o -c /home/szuszu/github/game-of-life/Game-Of-Life/src/imgui-sdl2.cpp",
+  "file": "/home/szuszu/github/game-of-life/Game-Of-Life/src/imgui-sdl2.cpp"
+},
+{
+  "directory": "/home/szuszu/github/game-of-life/Game-Of-Life/build",
   "command": "/usr/bin/g++  -I/home/szuszu/github/game-of-life/Game-Of-Life/include -g -o CMakeFiles/GameOfLife.dir/imgui/imgui_demo.cpp.o -c /home/szuszu/github/game-of-life/Game-Of-Life/imgui/imgui_demo.cpp",
   "file": "/home/szuszu/github/game-of-life/Game-Of-Life/imgui/imgui_demo.cpp"
 },
